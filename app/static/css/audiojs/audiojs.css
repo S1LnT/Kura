@@ -1,0 +1,81 @@
+.audio-player {
+    position: relative;
+    padding: 10px;
+    box-shadow: 0px 9px 5px -6px rgba(0, 0, 0, 0.1);
+    color:black;
+  }
+  .audio-player audio {
+    height: 0;
+    overflow: hidden;
+    display: none;
+  }
+  .audio-player .progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: whitesmoke;
+    box-shadow: none;
+    height: 100%;
+  }
+  .audio-player .progress .progress-bar {
+    background: lime;
+    background-size: 800% 800%;
+    animation: AnimationName 8s ease infinite;
+  }
+  .audio-player.already-played .progress .progress-bar {
+    background: lime;
+    opacity: 0.6;
+  }
+  .audio-player .song-info {
+    position: relative;
+    z-index: 15;
+  }
+  .audio-player .mejs-container {
+    display: none;
+  }
+  .audio-player .song-title {
+    width: 95%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    position: absolute;
+    left:10%;
+    font-weight: 700;
+  }
+  .audio-player .playpause {
+    padding: 0;
+    font-size: 41px;
+    line-height: 1;
+    background: none;
+    border: none;
+    margin-right: 10px;
+    color: #000000;
+    transition: all 200ms ease-in;
+  }
+  .audio-player .playpause:focus {
+    outline: none;
+  }
+  .audio-player .playpause:enabled:hover {
+    transform: scale(1.05);
+    transition: all 200ms ease-in;
+  }
+  .audio-player .song-time {
+    position: absolute;
+    bottom: -10px;
+    right: -50px;
+    font-size: 12px;
+  }
+
+  
+  @keyframes AnimationName {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }

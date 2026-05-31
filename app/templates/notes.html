@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block head %}
+<title>Note instance N. {{ room_num }}</title>
+<script>
+window.addEventListener("DOMContentLoaded", (event) => {
+    const socket = io({query:{notes_id: notesId}});
+    const textarea = document.getElementById('txtnote');
+    let debounceTimer;
+    const urlParams = new URLSearchParams(window.location.search);
+    const notesId = urlParams.get('notes_id');
+
+    // Listen for input changes in the textarea
+    textarea.addEventListener('input', function() {
+        // Clear the previous debounce timer
+        clearTimeout(debounceTimer);
+        
+        // Set a new timer for 300 ms (or your preferred time)
+        debounceTimer = setTimeout(() => {
+            const textContent = textarea.value;
+            socket.emit('textareaChanged', textContent); // Send data to server
+        }, 300); // Adjust debounce time as needed
+    });
+
+    // Listen for updates from the server
+    socket.on('textareaUpdate', function(data.text) {
+        // Update the textarea with the new content from the server
+        textarea.value = data.text;
+    });
+});
+</script>
+<script>
+ window.addEventListener("DOMContentLoaded", (event) => {
+            const note = document.querySelector(".note");
+            
+            // Set initial height based on scroll height
+            note.style.height = note.scrollHeight + "px";
+            note.style.overflowY = "hidden"; // Hide vertical overflow
+
+            // Add input event listener
+            note.addEventListener("input", function () {
+                this.style.height = "auto"; // Reset height to auto to calculate new scroll height
+                this.style.height = this.scrollHeight + "px"; // Set height to new scroll height
+                
+            });
+        });
+</script>
+<style>
+.note{
+    width:100%;
+    overflow-y: hidden;
+    background-color: transparent;
+    border:0px;
+    outline: 0px;
+}
+</style>
+{% endblock head %}
+{% block body %}
+<textarea class="note" placeholder="Inserisci la nota" id="txtnote">{{text}}</textarea>
+{% endblock body %}

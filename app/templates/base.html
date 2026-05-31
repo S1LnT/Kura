@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/heaven.ico') }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" />
+  <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/videojs/video-js.min.css') }}" />
+
+  <script type="text/javascript" src="{{ url_for('static', filename='js/videojs/video.min.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/jquery/jquery.min.js') }}"></script>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/font-awesome.min.css') }}" />
+
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/animate.min.css') }}" />
+
+   <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/normalize.css') }}" />
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO" crossorigin="anonymous"></script>
+  {% block head %}{% endblock %}
+</head>
+
+<body style="background-color:#28282e; color: #fff7e4;">
+
+  <div style="position:sticky; top:0; width: 100%; z-index: 9999;">
+    <nav class="navbar " style="background-color: #28282e; ">
+      <ul class="nav" style="left: 2vw; position: relative;">
+        <a class="navbar-brand" href="{{url_for('home.main')}}" style="color: white; font-weight:5000;">Kura</a>
+        <li class="nav-item">
+          {% if current_user.is_authenticated %}
+          <a class="nav-link" style="color:#b0eb93; font-weight:500;" href="{{url_for('post.PostFile')}}">Post</a>
+          {%else%}
+          <a class="nav-link disabled" href="#" aria-disabled="true">Post</a>
+          {% endif %}
+        </li>
+        <a class="nav-link" style="color: #fff7e4; font-weight:500;" href="{{url_for('notes.main')}}">Notes</a>
+        </li>
+        <li class="nav-item">
+          {% if current_user.is_authenticated %}
+          <a class="nav-link" style="color: #e9f59d; font-weight:500;" href="{{url_for('admin.main')}}">Bookmarked</a>
+          {% endif %}
+        </li>
+        <li class="nav-item">
+          {%if current_user.permissions | to_int > 900 %}
+          <a class="nav-link" style="color: #dea38b; font-weight:500;" href="{{url_for('admin.main')}}">AdminTools</a>
+          {% endif %}
+        </li>
+        <li class="nav-item">
+          {% if current_user.is_authenticated %}
+          <a class="nav-link" style="color: red; font-weight:500;" href="{{url_for('auth.logout')}}">Logout <span style="color: gray; font-size:12px;">({{ current_user.username }})</span> </a>
+          {%else%}
+          <a class="nav-link" style="color: lime; font-weight:500;" href="{{url_for('auth.login')}}">Login</a>
+          {% endif %}
+        </li>
+      </ul>
+
+      {% if request.path == "/" or request.path == "/home"  or (request.path == "/search" and request.query_string) %}
+      <div style="right:1vw;position:relative;  ">
+        <form class="d-flex" role="search" method="POST" action="">
+          {{ searchform.csrf_token }}
+          {{searchform.search(class_="form-control me-2")}}
+
+          {{searchform.submit(class_="btn btn-outline-success")}}
+        </form>
+      </div>
+      {% endif %}
+
+
+
+  </div>
+  </nav>
+  </div>
+  <div style="position: relative; top:10vh">
+    {% block body %}{% endblock %}
+  </div>
+
+</body>
+
+</html>

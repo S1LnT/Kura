@@ -1,0 +1,52 @@
+{% extends "admin/admin_base.html" %}
+{% block head %}
+
+{% endblock head %}
+
+{% block body %}
+<div style="display: flex;
+justify-content: center;
+align-items: center;
+min-height: 90vh;">
+    <form style="text-align: left; " action="" method="post" enctype="multipart/form-data" id="UploadForm">
+        {{ form.csrf_token }}
+        <div class="form-floating">
+
+            {{ form.title(class_="form-control")}}
+            <label for="title">Title</label>
+        </div>
+        <br>
+        <div class="form-floating">
+
+            {{ form.desc(class_="form-control")}}
+            <label for="desc">Description</label>
+        </div>
+        
+        {% if ftype == "file" %}
+        <br>
+        <div class="mb-3">
+        {{ form.file(class_="form-control")}}
+        </div>
+        {% endif %}
+        <br>
+        <div>
+            {% for subfield in form.perm %}
+            <div class="form-check">
+                <tr>
+
+                    <td>{{ subfield(class_="form-check-input",id_=loop.index0, style_="border-color:#4da14a; ") }}</td>
+                    <td>{{subfield.label(class_="form-check-label", for_=loop.index0)}}</td>
+
+                </tr>
+            </div>
+            {% endfor %}
+            <br>
+        <button type="submit" class="btn btn-primary" id="btnPost"
+            style="width: 100%; border:2px; border-style: solid; border-color: black; background-color:#4da14a;">Modifica</button>
+
+        </div>
+        
+</form>
+
+</div>
+{% endblock body %}

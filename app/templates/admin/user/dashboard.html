@@ -1,0 +1,96 @@
+
+{% extends "admin/admin_base.html" %}
+{% block head %}
+<title>Utenti</title>
+<style>
+
+td, th { padding: 8px; padding: .5rem;
+}
+
+th {
+  text-align: left;
+  font-weight: 300;
+  font-size: 20px;
+  font-size: 1.25rem;
+}
+
+.table {
+  width: 100%; /* Ensure the table takes full width */
+  border-collapse: collapse; /* Ensure borders don't add extra space */
+  padding: 16px;
+  padding: 1rem;
+}
+
+.table__heading { 
+  border-bottom: 2px solid #FFC842; /* Add bottom border for headings */
+}
+
+.table__row {
+  display: table-row; /* Ensure rows behave like table rows */
+}
+
+.table__content {
+  display: table-cell; /* Ensure cells behave like table cells */
+  padding: 0.5rem;
+}
+
+.table__heading { border-bottom: 2px solid #FFC842; }
+ @media (max-width: 32rem) {
+ .table__heading {
+display: none;
+}
+ .table__content {
+ display: block;
+ padding: .5rem 0;
+}
+ .table__row {
+ margin: .25rem 1rem;
+ padding: .5rem 0;
+ display: block;
+ border-bottom: 2px solid #FFC842;
+}
+ .table__content:before {
+ content: attr(data-heading);
+ display: inline-block;
+ width: 5rem;
+ margin-right: .5rem;
+ color: #999;
+ font-size: .75rem;
+ font-weight: 700;
+ text-transform: uppercase;
+ letter-spacing: 2px;
+}
+}
+
+h1, h4 {
+  margin: 50px auto 50px auto;
+  text-align: center;
+}
+</style>
+{% endblock head %}
+
+{% block body %}
+<h1>Tabella Utenti</h1>
+<table class="table">
+  <tr>
+    <th class="table__heading">ID</th>
+    <th class="table__heading">Username</th>
+    <th class="table__heading">Date Created</th>
+    <th class="table__heading">Last Login</th>
+    <th class="table__heading">Permissions</th>
+    <th class="table__heading">Actions</th>
+  </tr>
+ {% for i in range(user_ids|length) %}
+    <tr class="table__row">
+      <td class="table__content" data-heading="ID">{{ user_ids[i] }}</td>
+      <td class="table__content" data-heading="Username">{{ user_name[i] }}</td>
+      <td class="table__content" data-heading="Date Created">{{ user_date[i] }}</td>
+      <td class="table__content" data-heading="Last Login">{{ user_login[i] }}</td>
+      <td class="table__content" data-heading="Permissions">{{ user_perm[i] }}</td>
+      <td class="table__content" data-heading="Actions">
+          <a href="{{ url_for('admin.elimina_user', id=user_ids[i]) }}" style="color:white">Delete</a>
+      </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock body %}

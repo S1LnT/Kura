@@ -1,0 +1,11 @@
+{% extends "admin/admin_base.html" %}
+{% block head %}
+<title>Admin Tools</title>
+{% endblock head %}
+{% block body %}
+<h2>Comandi</h2>
+<br>
+Svuota la temp folder: <a class="btn btn-danger"href="{{ url_for('admin.flush_temp') }}" role="button" > FLUSH </a>
+<br>
+Svuota la tabella dei Post e i file associati : <a class="btn btn-danger disabled" href="{{ url_for('admin.wipe') }}" role="button" aria-disabled="true"> WIPE </a>
+{% endblock body %}

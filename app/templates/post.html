@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+{% block head %}
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<title>Post</title>
+<style>
+    input[type="radio"]:checked {
+        background-color: #4da14a;
+      }
+      #myDropzone{
+        background-color: #262626;
+        
+      }
+      .progress-bar {display:none;}
+      .dz-details { background-color: transparent;}
+      .dz-progress{display:none;}
+      .dz-image{background-color: transparent;}
+      
+</style>
+{{ dropzone.load_css() }}
+{{ dropzone.load_js() }}
+{% endblock %}
+{% block body %}
+
+<div style="display: flex;
+justify-content: center;
+align-items: center;
+min-height: 90vh; ">
+    <form style="text-align: left;" action="" method ="post" enctype="multipart/form-data" id="UploadForm">
+    {{ form.csrf_token }}
+    <div class="form-floating">   
+        
+        {{ form.title(class_="form-control")}}
+        <label for="title">Title</label>
+    </div>
+    <br>
+    <div class="form-floating">
+        
+        {{ form.desc(class_="form-control")}}
+        <label for="desc">Description</label>
+    </div>
+    <br>
+    <div>
+        {% for subfield in form.perm %}
+        
+        <div class="btn-group-vertical"  role="group" style="margin 2%">
+            <tr>
+                <td>{{ subfield(class_="btn-check",id_=loop.index0, style_="border-color:#4da14a; ") }}</td>
+                <td>{{subfield.label(class_="btn btn-outline", for_=loop.index0, style_="min-width:33%;width:33%;")}}</td>
+                
+            </tr>
+        </div>
+        {% endfor %}
+        
+    </div>
+    <br>
+    <div class="dropzone " id="myDropzone"></div>
+    <div class="mb-3">
+    <br>
+        <div class="progress" id="prog" role="progressbar" aria-label="Example with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+    <div class="progress-bar"  style="width: 0% display:none;">0%</div>
+        
+    </div>
+    <br>
+    {% if current_user.permissions == "999" %}
+    <div class="btn-group" role="group" aria-label="Basic checkbox toggle button group">
+    <input type="checkbox" class="btn-check" id="avcheck" autocomplete="off">
+    <label class="btn btn-outline-primary" for="avcheck" style="width:100%">Salta controllo file</label>
+    </div>
+     <br>
+     <br>
+    {% endif %}
+    
+    <button type="submit" class="btn btn-primary" id="btnPost" style="width: 100%; border:2px; border-style: solid; border-color: black; background-color:#4da14a;">Post</button>
+
+  </div> 
+
+      
+    </form>
+    
+
+</div>
+
+</div>
+<div style="width: 100%; display: flex;
+justify-content: center;
+align-items: center; bottom:20%;">
+    <span id="flash"></span>
+    </div>
+<script>
+const socket = io();
+let socketId; // Declare the socketId variable in a broader scope
+let availableSpace = 0; // Initialize availableSpace
+
+// Listen for the 'flash' event from the server
+socket.on('flash', function(data) {
+    var flash = document.getElementById('flash');
+    flash.innerHTML = data.msg;
+    flash.style.color = data.color;
+});
+
+// Listen for the connect event to get the socket ID
+socket.on('connect', function() {
+    socketId = socket.id; // Store the socket ID globally
+});
+
+// Fetch the available disk space from the server (minus 1GB)
+fetch('/disk-space')
+    .then(response => response.json())
+    .then(data => {
+        availableSpace = data.available_space; // Get available space in bytes
+    
+    })
+    .catch(error => console.error("Error fetching disk space:", error));
+
+// Disable autoDiscover for Dropzone
+Dropzone.autoDiscover = false;
+var csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+// Initialize Dropzone
+var myDropzone = new Dropzone("div#myDropzone", {
+    url: "/post",
+    maxFiles: 1,
+    autoProcessQueue: false,
+    parallelChunkUploads: true,
+    parallelUploads: 5,
+    uploadMultiple: false,
+    chunking: true,
+    retryChunks: true,
+    chunkSize: 536870912, 
+    maxFilesize: 102400,
+    retryChunksLimit: 30,
+    forceChunking: true,
+    timeout: 1800000, // 30 minutes
+    dictDefaultMessage: "Clicca o Drag & Drop il file qui.",
+    headers: {
+        'X-CSRFToken': csrfToken // Add CSRF token to headers
+    }
+});
+
+// Reference to Dropzone instance
+var dz = myDropzone;
+
+// Handle maximum file limit
+dz.on("maxfilesexceeded", function(file) {
+    dz.removeAllFiles();
+    dz.addFile(file); // Add the new file after removing the old one
+});
+
+// Update progress bar during file upload
+dz.on("uploadprogress", function(file, progress) {
+    var progressElement = document.querySelector(".progress-bar");
+    if (progressElement) {
+        progressElement.style.display = "block";
+        progressElement.style.width = progress + "%";
+        progressElement.textContent = progress.toFixed(0) + "%";
+    }
+});
+
+// Handle form and Dropzone file uploads on button click
+document.getElementById('btnPost').addEventListener('click', function(event) {
+    if (dz.getQueuedFiles().length > 0) {
+        event.preventDefault(); // Prevent form's default submission
+        var form = document.getElementById("UploadForm");
+        if (!form.checkValidity()) {
+            form.reportValidity(); // Show validation error messages
+            return;
+        }
+        // Process the file queue (triggers the Dropzone file uploads)
+        dz.processQueue(); // Start the file upload queue
+    }
+});
+
+// Ensure Dropzone waits for the form submission to complete before uploading files
+dz.on("sending", function(file, xhr, formData) {
+    // Append form data (form fields) to the file data
+    var form = document.getElementById("UploadForm");
+    var checkbox = document.getElementById('avcheck');
+    if (checkbox == null) {
+        formData.append('avchk', "do");
+    }
+    else{
+        if (checkbox.checked) {
+            formData.append('avchk', "skip");
+        }
+        else{
+            formData.append('avchk', "do")
+        }
+    }
+    formData.append('title', form.querySelector('input[name="title"]').value);
+    formData.append('filename', file.name);
+    formData.append('description', form.querySelector('textarea[name="desc"]').value);
+    formData.append('perm', form.querySelector('input[name="Perm"]:checked').value);
+    formData.append('sid', socketId); // Use the globally stored socket ID
+});
+
+// Check file size before allowing it to be added to Dropzone
+dz.on("addedfile", function(file) {
+    if (file.size > availableSpace) {
+        this.removeFile(file); // Remove the file from Dropzone
+        var flash = document.getElementById('flash');
+        flash.innerHTML = "Spazio nel disco insufficiente";
+        flash.style.color = "red";
+    } else {
+        // If file size is valid, you may notify the user here if necessary
+    }
+});
+
+// Handle successful uploads
+dz.on("success", function(file) {
+    var form = document.getElementById("UploadForm");
+    dz.removeAllFiles(); // Clear files from Dropzone
+    form.reset(); // Reset the form fields
+
+    var progressElement = document.querySelector(".progress-bar");
+    if (progressElement) {
+        progressElement.style.display = "none";
+        progressElement.style.width = 0 + "%";
+        progressElement.textContent = 0 + "%";
+    }
+});
+</script>
+
+
+{% endblock %}
+
+
+
+
